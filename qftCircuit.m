@@ -1,5 +1,3 @@
-
-
 function qftCircuit( circuit, nbQubits )
   H = @qclab.qgates.Hadamard ;
   CP = @qclab.qgates.CPhase ;

@@ -1,260 +1,59 @@
-function [grids, N_dir, dx] = GenericElliptic_QPDE(f, A, N, d,u_true)
-    flagUtrue=true;    
-    if nargin < 5
-           flagUtrue=false;
-    end
-     
-    x_lb = 0;
-    x_rb = 1;
-    L  = x_rb - x_lb;
-    dx = L / N;
-    n=log2(N);
-    x_vec = x_lb + (0:N-1) * dx;
-    
-    % Prepare generic inputs for ndgrid
-    ndgrid_inputs = repmat({x_vec}, 1, d);
-    
-    % Initialize 'grids' as a cell array (container for generic data)
-    grids = cell(1, d);
-    
-    % Generate N-dimensional grids
-    [grids{:}] = ndgrid(ndgrid_inputs{:});
-    
-    % N_dir is now a simple vector [N, N, N...]
-    N_dir = repmat(N, 1, d);   
+function [grids, N_dir, dx] = GenericElliptic_QPDE(f, A, N, d, u_true)
 
-    f_vals = f(grids{:});
-    f_flat = f_vals(:);
-    
-   
-    
-    u_generic = solver_Elliptic_generic(f_flat, grids, A, N_dir, dx);
-    op=QPDE_Generator(A,n);
-    u_quantum=op*f_flat;
-    
-    if flagUtrue
-        ground_truth=u_true(grids{:});
-    end
+%% --- Setup ---
+flagUtrue = (nargin >= 5);
+params    = getParams(N, d);
+dx        = params.dx;
+N_dir     = params.N_dir;
+grids     = params.grids;
 
-    figure;
+%% --- Evaluate RHS and Solve ---
+f_vals  = f(grids{:});
+f_flat  = f_vals(:);
 
-  
-    if d == 2
-        if flagUtrue
+u_generic = solver_Elliptic_generic(f_flat, grids, A, N_dir, dx);
 
+op = QPDE_Generator(A, params.n);
+u_quantum = op * f_flat;
+
+%% --- Ground Truth (spectral, optional) ---
+if flagUtrue
+    ground_truth = computeSpectralGroundTruth(f_vals, A, N, d, dx);
+end
+
+%% --- Visualize ---
+figure;
+if d == 2
     u_quantum = reshape(real(u_quantum), N, N);
- 
-    % --- ROW 1 ---
-    % 1. Ground Truth
-    subplot(2, 3, 1)
-    imagesc(ground_truth'); 
-    axis square; colorbar;
-    title('Ground Truth');
-    xlabel('x'); ylabel('y'); set(gca, 'YDir', 'normal');
-
-    % 2. Classical Solution
-    subplot(2, 3, 2)
-    imagesc(u_generic'); 
-    axis square; colorbar;
-    title('Classical Solution');
-    xlabel('x'); ylabel('y'); set(gca, 'YDir', 'normal');
-
-    % 3. Error: Ground Truth vs Classical
-    subplot(2, 3, 3)
-    imagesc(abs(ground_truth - u_generic)'); 
-    axis square; colorbar;
-    title('Classical Error');
-    xlabel('x'); ylabel('y'); set(gca, 'YDir', 'normal');
-
-
-    % 5. Quantum Solution
-    subplot(2, 3, 5)
-    imagesc(u_quantum'); 
-    axis square; colorbar;
-    title('Quantum Solution');
-    xlabel('x'); ylabel('y'); set(gca, 'YDir', 'normal');
-
-    % 6. Error: Ground Truth vs Quantum (Analytical)
-    subplot(2, 3, 6)
-    imagesc((ground_truth - u_quantum)'); 
-    axis square; colorbar;
-    title('Quantum Error');
-    xlabel('x'); ylabel('y'); set(gca, 'YDir', 'normal');
-
-        else
-        % --- 2D Visualization ---
-        u_quantum = reshape(real(u_quantum), N, N);
-        
-        subplot(1,3,1)
-        imagesc(u_generic'); 
-        axis square; colorbar;
-        title('Classical Solution');
-        xlabel('x'); ylabel('y'); set(gca, 'YDir', 'normal');
-        
-        subplot(1,3,2)
-        imagesc(u_quantum'); 
-        axis square; colorbar;
-        title('Quantum Solution');
-        xlabel('x'); ylabel('y'); set(gca, 'YDir', 'normal');
-        
-        subplot(1,3,3)
-        imagesc(abs(u_generic - u_quantum)'); 
-        axis square; colorbar;
-        title('Absolute Error');
-        xlabel('x'); ylabel('y'); set(gca, 'YDir', 'normal');
-        end  
-    elseif d == 3
-
-        if flagUtrue
-    % --- 3D Visualization (2x3 Grid) ---
-    u_quantum = reshape(real(u_quantum), N, N, N);
-    
-    nx = size(u_generic, 1);
-    ny = size(u_generic, 2);
-    nz = size(u_generic, 3);
-
-    figure('Color', 'w', 'Position', [100, 100, 1400, 800]);
-
-    % --- ROW 1: GROUND TRUTH & CLASSICAL ---
-    
-    % 1. Ground Truth
-    subplot(2, 3, 1)
-    slice(ground_truth, [], [], 1:nz); hold on;
-    slice(ground_truth, 1:nx, [], []); slice(ground_truth, [], 1:ny, []);
-    shading interp; axis equal tight; colorbar; view(3); hold off;
-    title('Ground Truth'); xlabel('x'); ylabel('y'); zlabel('z');
-
-    % 2. Classical Solution
-    subplot(2, 3, 2)
-    slice(u_generic, [], [], 1:nz); hold on;
-    slice(u_generic, 1:nx, [], []); slice(u_generic, [], 1:ny, []);
-    shading interp; axis equal tight; colorbar; view(3); hold off;
-    title('Classical Solution'); xlabel('x'); ylabel('y'); zlabel('z');
-
-    % 3. Classical Error: abs(ground_truth - u_generic)
-    subplot(2, 3, 3)
-    err_classical = abs(ground_truth - u_generic);
-    slice(err_classical, [], [], 1:nz); hold on;
-    slice(err_classical, 1:nx, [], []); slice(err_classical, [], 1:ny, []);
-    shading interp; axis equal tight; colorbar; view(3); hold off;
-    title('Classical Absolute Error'); xlabel('x'); ylabel('y'); zlabel('z');
-
-    % --- ROW 2: QUANTUM ---
-    % Slot 4 (2,3,4) is skipped to stay empty
-
-    % 5. Quantum Solution
-    subplot(2, 3, 5)
-    slice(u_quantum, [], [], 1:nz); hold on;
-    slice(u_quantum, 1:nx, [], []); slice(u_quantum, [], 1:ny, []);
-    shading interp; axis equal tight; colorbar; view(3); hold off;
-    title('Quantum Solution'); xlabel('x'); ylabel('y'); zlabel('z');
-
-    % 6. Quantum Error: abs(ground_truth - u_quantum)
-    subplot(2, 3, 6)
-    err_quantum = abs(ground_truth - u_quantum);
-    slice(err_quantum, [], [], 1:nz); hold on;
-    slice(err_quantum, 1:nx, [], []); slice(err_quantum, [], 1:ny, []);
-    shading interp; axis equal tight; colorbar; view(3); hold off;
-    title('Quantum Absolute Error'); xlabel('x'); ylabel('y'); zlabel('z');
-
-    sgtitle('3D Comparison: Ground Truth, Classical, and Quantum Solutions');
-        else
-      % --- 3D Visualization ---
-        u_quantum = reshape(real(u_quantum), N, N, N);
-        err = abs(u_generic - u_quantum);
-        
-        nx = size(u_generic, 1);
-        ny = size(u_generic, 2);
-        nz = size(u_generic, 3);
-
-        % 1. Classical Solution
-        subplot(1,3,1)
-        slice(u_generic, [], [], 1:nz)
-        hold on
-        slice(u_generic, 1:nx, [], [])
-        slice(u_generic, [], 1:ny, [])
-        shading interp
-        axis equal tight
-        colorbar
-        title('Classical Solution')
-        xlabel('x'); ylabel('y'); zlabel('z')
-        view(3)
-        hold off
-
-        % 2. Quantum Solution
-        subplot(1,3,2)
-        slice(u_quantum, [], [], 1:nz)
-        hold on
-        slice(u_quantum, 1:nx, [], [])
-        slice(u_quantum, [], 1:ny, [])
-        shading interp
-        axis equal tight
-        colorbar
-        title('Quantum Solution')
-        xlabel('x'); ylabel('y'); zlabel('z')
-        view(3)
-        hold off
-
-        % 3. Error
-        subplot(1,3,3)
-        slice(err, [], [], 1:nz)
-        hold on
-        slice(err, 1:nx, [], [])
-        slice(err, [], 1:ny, [])
-        shading interp
-        axis equal tight
-        colorbar
-        title('Absolute Error')
-        xlabel('x'); ylabel('y'); zlabel('z')
-        view(3)
-        hold off
-        end
+    if flagUtrue
+        plotComparison2D(ground_truth, u_generic, u_quantum);
+    else
+        plotSolutions2D(u_generic, u_quantum);
     end
-
-
-timestamp = char(datetime('now','Format','yyyyMMdd_HHmmSS'));
-folderName = sprintf('Results/Results_d%d_%s', d, timestamp);
-
-if ~exist(folderName, 'dir')
-    mkdir(folderName);
+elseif d == 3
+    u_quantum = reshape(real(u_quantum), N, N, N);
+    if flagUtrue
+        plotComparison3D(ground_truth, u_generic, u_quantum);
+    else
+        plotSolutions3D(u_generic, u_quantum);
+    end
 end
 
-h5FileName = fullfile(folderName, 'simulation_data.h5');
+%% --- Save Results ---
+saveResults(u_generic, u_quantum, d, flagUtrue, ground_truth);
 
-
-h5create(h5FileName, '/u_generic', size(u_generic));
-h5write(h5FileName, '/u_generic', double(u_generic));
-
-u_q_real = real(u_quantum); % Ensure real for H5 compatibility
-h5create(h5FileName, '/u_quantum', size(u_q_real));
-h5write(h5FileName, '/u_quantum', double(u_q_real));
-
-if flagUtrue
-    h5create(h5FileName, '/u_true', size(ground_truth));
-    h5write(h5FileName, '/u_true', double(ground_truth));
-    fprintf('Saved u_generic, u_quantum, and u_true to %s\n', folderName);
-else
-    fprintf('Saved u_generic and u_quantum to %s \n', folderName);
-end
-
-% --- Relative Error Calculation ---
+%% --- Report Errors ---
 u_q_real = real(u_quantum);
-
 if flagUtrue
-    % Compare both to Ground Truth
-    rel_err_classical = norm(u_generic(:) - ground_truth(:)) / norm(ground_truth(:));
-    rel_err_quantum   = norm(u_q_real(:) - ground_truth(:)) / norm(ground_truth(:));
-    
+    rel_err_classical = norm(u_generic(:)  - ground_truth(:)) / norm(ground_truth(:));
+    rel_err_quantum   = norm(u_q_real(:)   - ground_truth(:)) / norm(ground_truth(:));
     fprintf('\n--- Relative Errors (vs Ground Truth) ---\n');
     fprintf('Classical Relative Error: %.4e\n', rel_err_classical);
-    fprintf('Quantum Relative Error:   %.4e\n', rel_err_quantum);
+    fprintf('Quantum   Relative Error: %.4e\n', rel_err_quantum);
 else
-    % Compare Quantum to Classical Solution
     rel_err_quantum = norm(u_q_real(:) - u_generic(:)) / norm(u_generic(:));
-    
     fprintf('\n--- Relative Error (vs Classical Solution) ---\n');
     fprintf('Quantum Relative Error: %.4e\n', rel_err_quantum);
 end
+
 end
-
-

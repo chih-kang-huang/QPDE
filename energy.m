@@ -1,6 +1,5 @@
 function E = energy(u, A, N, dx, d)
-% COMPUTE_ENERGY_PYTHON Calculates Energy using spectral gradients.
-% Formula: E = 0.5 * mean( <A * Grad(u), Grad(u)> )
+% Calculates Energy using spectral gradients.
 
     % 1. Forward FFT
     u_h = fftn(u);
@@ -13,7 +12,7 @@ function E = energy(u, A, N, dx, d)
         k_vals = (2i * pi * freqs) / (N * dx);
         k_vecs{dim_i} = k_vals;
     end
-    
+
     [K_grids{1:d}] = ndgrid(k_vecs{:});
 
     % 3. Compute Gradients in Fourier Space
