@@ -16,11 +16,10 @@ u_init = u_init_handle(grids{:});
 %% --- Operator Construction ---
 % fprintf('Building Quantum Operator for d=%d, N=%d...\n', d, N);
 Q_Op  = QPDE_Generator_Diffusion(A, params.n, dt);
-alpha = 1.0; 
 
 %% --- Time Evolution Loop ---
 [u_class, u_quant, E_class_history, E_quant_history] = runTimeEvolution(...
-    u_init, f_vals, grids, A, N_vecs, dx, dt, steps, Q_Op, alpha, d, N);
+    u_init, f_vals, grids, A, N_vecs, dx, dt, steps, Q_Op, d, N);
 
 %% --- Ground Truth (spectral, optional) ---
 if flagUtrue

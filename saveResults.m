@@ -3,8 +3,8 @@ function saveResults(u_generic, u_quantum, d, flagUtrue, ground_truth)
         ground_truth = [];
     end
 
-    timestamp  = char(datetime('now', 'Format', 'yyyyMMdd_HHmmSS'));
-    folderName = sprintf('Results/Results_d%d_%s', d, timestamp);
+timestamp = char(datetime('now', 'Format', 'yyyyMMdd_HHmmss_SSS'));    
+folderName = sprintf('Results/Results_d%d_%s', d, timestamp);
 
     if ~exist(folderName, 'dir')
         mkdir(folderName);

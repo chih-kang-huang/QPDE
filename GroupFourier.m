@@ -1,5 +1,6 @@
 function totalCircuit = GroupFourier(d,n)
 % Total circuit: d registers of size n + 1 ancilla
+addpath("/home/g.antonioli/qclab")
 totalCircuit = qclab.QCircuit(d*n + 1);
 
 % Apply a QFT to each n-qubit register

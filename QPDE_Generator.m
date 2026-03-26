@@ -7,7 +7,7 @@ function totalMat = QPDE_Generator(A, n)
 %
 %   Output:
 %     totalMat - 2^(d*n) x 2^(d*n) unitary operator matrix
-
+addpath("/home/g.antonioli/qclab")
 d = size(A, 1);
 N = 2^n;
 

@@ -4,7 +4,7 @@ function totalMat = QPDE_Generator_Diffusion(A, n, dt)
 %   A  : Diffusion coefficient matrix (d x d)
 %   n  : Number of qubits per dimension (N = 2^n)
 %   dt : Time step size
-
+addpath("/home/g.antonioli/qclab")
 d = size(A, 1);
 N = 2^n;
 
@@ -13,7 +13,10 @@ N_vecs = repmat(N, 1, d); % Grid size for each dimension
 dx     = 1.0 / N;         % Assuming domain length L = 1.0
 
 
-OP_vals = buildEllipticDenom(A, N_vecs, dx, d);
+OP_vals = buildDiffusionDenom(A, N_vecs, dx, d);
+
+fprintf("OPVALS(1,1):\n")
+disp(OP_vals(1,1));
 
 Inv_OP_vals = 1 ./ (1 - dt * OP_vals(:));
 
@@ -36,6 +39,6 @@ totalCircuit.push_back(qclab.qgates.MatrixGate(0:d*n, DiagEncoding, "Diagonal"))
 totalCircuit.push_back(FG);
 
 M = totalCircuit.matrix;
-totalMat = M(1:2^(d*n), 1:2^(d*n)) * alpha;
+totalMat = real(M(1:2^(d*n), 1:2^(d*n))) * alpha;
 
 end

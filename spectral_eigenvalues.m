@@ -1,4 +1,4 @@
-function k = spectral_eigenvalues(N, L)
+function k = spectral_eigenvalues(N,setone, L)
 %   Eigenvalues of d/dx with periodic BCs: 2*pi*i*freq
 %
 %   Inputs:
@@ -9,12 +9,18 @@ function k = spectral_eigenvalues(N, L)
 %     k - row vector of Fourier eigenvalues (2π i k / L)
 
     if nargin < 2
-        L = 1.0;
+       
+        setone=true;
+         L = 1.0;
     end
 
     freq = fftfreq(N, L/N);
     k    = 2i * pi * freq;
+    %k(1)=2i * pi *1;
+    if setone
     k(1)=1;
+    end
+    
 end
 
 function f = fftfreq(N, d)

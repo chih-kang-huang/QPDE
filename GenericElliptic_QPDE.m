@@ -22,22 +22,22 @@ if flagUtrue
 end
 
 %% --- Visualize ---
-figure;
-if d == 2
-    u_quantum = reshape(real(u_quantum), N, N);
-    if flagUtrue
-        plotComparison2D(ground_truth, u_generic, u_quantum);
-    else
-        plotSolutions2D(u_generic, u_quantum);
-    end
-elseif d == 3
-    u_quantum = reshape(real(u_quantum), N, N, N);
-    if flagUtrue
-        plotComparison3D(ground_truth, u_generic, u_quantum);
-    else
-        plotSolutions3D(u_generic, u_quantum);
-    end
-end
+% if d == 2
+%     u_quantum = reshape(real(u_quantum), N, N);
+%     if flagUtrue
+%         plotComparison2D(ground_truth, u_generic, u_quantum);
+%     else
+%         plotSolutions2D(u_generic, u_quantum);
+%     end
+% elseif d == 3
+%     u_quantum = reshape(real(u_quantum), N, N, N);
+%     if flagUtrue
+%         plotComparison3D(ground_truth, u_generic, u_quantum);
+%     else
+%         plotSolutions3D(u_generic, u_quantum);
+%     end
+% end
+visualize_simulation_results(u_generic, real(u_quantum), d, N,ground_truth)
 
 %% --- Save Results ---
 saveResults(u_generic, u_quantum, d, flagUtrue, ground_truth);

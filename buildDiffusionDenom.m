@@ -1,10 +1,10 @@
-function denom = buildEllipticDenom(A, N_vecs, dx, dim)
+function denom = buildDiffusionDenom(A, N_vecs, dx, dim)
 
     % Get 1D eigenvalue vectors for each dimension
     k_vecs = cell(1, dim);
     for d = 1:dim
         L          = N_vecs(d) * dx;
-        k_vecs{d}  = spectral_eigenvalues(N_vecs(d), true,L);
+        k_vecs{d}  = spectral_eigenvalues(N_vecs(d),false, L);
     end
 
     % Expand to N-D grids

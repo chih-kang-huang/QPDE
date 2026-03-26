@@ -1,4 +1,4 @@
-function [u_class, u_quant, E_class, E_quant] = runTimeEvolution(u_init, f_vals, grids, A, N_vecs, dx, dt, steps, Q_Op, alpha, d, N)
+function [u_class, u_quant, E_class, E_quant] = runTimeEvolution(u_init, f_vals, grids, A, N_vecs, dx, dt, steps, Q_Op, d, N)
     u_class = u_init;
     u_quant = u_init;
     
@@ -13,7 +13,7 @@ function [u_class, u_quant, E_class, E_quant] = runTimeEvolution(u_init, f_vals,
         
         % --- Quantum Step ---
         v = u_quant - dt * f_vals; 
-        u_vec_next = (Q_Op * v(:)) * alpha;
+        u_vec_next = (Q_Op * v(:));
         u_quant = reshape(real(u_vec_next), N_vecs);
         
         % --- Compute Energy ---
