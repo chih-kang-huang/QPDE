@@ -1,4 +1,5 @@
 function qftCircuit( circuit, nbQubits )
+addpath("/home/g.antonioli/qclab")
   H = @qclab.qgates.Hadamard ;
   CP = @qclab.qgates.CPhase ;
   SWAP = @qclab.qgates.SWAP ;

@@ -15,8 +15,6 @@ dx     = 1.0 / N;         % Assuming domain length L = 1.0
 
 OP_vals = buildDiffusionDenom(A, N_vecs, dx, d);
 
-fprintf("OPVALS(1,1):\n")
-disp(OP_vals(1,1));
 
 Inv_OP_vals = 1 ./ (1 - dt * OP_vals(:));
 

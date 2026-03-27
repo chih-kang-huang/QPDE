@@ -8,13 +8,13 @@ warning('off', 'all')
 dt    = 1e-3;   % Time step (diffusion solver only)
 steps = 100;    % Number of time steps (diffusion solver only)
 
-diffusion=false;
+diffusion=true;
 elliptic=true;
 %% =========================================================
 %  CONFIGURATION GRID  
 % ==========================================================
 dims_to_test = [3];      
-ns_to_test   = [3];      
+ns_to_test   = [4];      
 
 % ---- A MATRIX CONFIGURATIONS --------------------------------
 % Each entry has:
@@ -106,14 +106,14 @@ for iDim = 1:numel(dims_to_test)
                           test_id, n_total, dim, n, N, Alabel);
             fprintf('%s\n', tag);
             fprintf('  A =\n'); disp(A);
-            try
-                GenericDiffusion_QPDE(fDiff, uInit, A, N, dim, dt, steps, fAnalytical);
+            % try
+                GenericDiffusion_QPDE(fDiff, uInit, A, N, dim, dt, steps,fAnalytical);%
                 results(test_id).status = 'PASS';
-            catch ME
-                results(test_id).status = 'FAIL';
-                results(test_id).error  = ME.message;
-                fprintf('  !! ERROR: %s\n', ME.message);
-            end
+            % catch ME
+            %     results(test_id).status = 'FAIL';
+            %     results(test_id).error  = ME.message;
+            %     fprintf('  !! ERROR: %s\n', ME.message);
+            % end
             results(test_id).tag    = tag;
             results(test_id).solver = 'Diffusion';
             results(test_id).dim    = dim;
@@ -128,14 +128,14 @@ for iDim = 1:numel(dims_to_test)
                           test_id, n_total, dim, n, N, Alabel);
             fprintf('%s\n', tag);
             fprintf('  A =\n'); disp(A);
-            % try
+            try
                 GenericElliptic_QPDE(fEll, A, N, dim, uTrueEll);
                 results(test_id).status = 'PASS';
-            % catch ME
-            %     results(test_id).status = 'FAIL';
-            %     results(test_id).error  = ME.message;
-            %     fprintf('  !! ERROR: %s\n', ME.message);
-            % end
+            catch ME
+                results(test_id).status = 'FAIL';
+                results(test_id).error  = ME.message;
+                fprintf('  !! ERROR: %s\n', ME.message);
+            end
             results(test_id).tag    = tag;
             results(test_id).solver = 'Elliptic';
             results(test_id).dim    = dim;

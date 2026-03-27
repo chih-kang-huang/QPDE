@@ -1,28 +1,49 @@
-function visualize_energy(energy_true, energy_num, dt)
+function visualize_energy(energy_class, energy_quant, varargin)
+% visualize_energy(E_class, E_quant, dt) 
+% OR 
+% visualize_energy(E_class, E_quant, E_gt, dt)
+%
 % Plots the log-energy evolution over time.
 
-    time = dt * (0:length(energy_true)-1);
+    % 1. Determine if Ground Truth was provided based on number of arguments
+    if nargin == 4
+        energy_gt = varargin{1};
+        dt        = varargin{2};
+        has_gt    = true;
+    else
+        dt        = varargin{1};
+        has_gt    = false;
+    end
 
-    log_energy_true = log(energy_true);
-    log_energy_num  = log(energy_num);
+    % 2. Setup time vector
+    time = dt * (0:length(energy_class)-1);
     
     figure;
-   
-    plot(time, log_energy_num, 'LineWidth', 1.5, ...
-         'DisplayName', '$Energy_{quantum}$');
     hold on;
+
+    % 3. Plot Quantum Energy
+    plot(time, log(energy_quant), 'LineWidth', 1.5, ...
+         'DisplayName', '$Energy_{quantum}$');
     
-    plot(time, log_energy_true, '--', 'LineWidth', 1.5, ...
+    % 4. Plot Classical Energy
+    plot(time, log(energy_class), '--', 'LineWidth', 1.5, ...
          'DisplayName', '$Energy_{classical}$');
          
+    % 5. Plot Ground Truth (if provided)
+    if has_gt
+        plot(time, log(energy_gt), ':', 'Color', [0.5 0.5 0.5], 'LineWidth', 2, ...
+             'DisplayName', '$Energy_{GT}$');
+    end
+    
     hold off;
     
+    % Formatting
     ylabel('log(Energy)');
-
     xlabel('Time');
-    
+    grid on;
     legend('Interpreter', 'latex', 'Location', 'best');
+    title('Energy Evolution (Log Scale)');
     
-    % plt.savefig("Heat2D_energy.png", bbox_inches="tight")
+    % Optional: save the figure
     % saveas(gcf, 'Heat2D_energy.png');
 end
