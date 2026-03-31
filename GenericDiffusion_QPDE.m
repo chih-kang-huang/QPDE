@@ -13,39 +13,46 @@ grids     = params.grids;
 f_vals = f_handle(grids{:});
 u_init = u_init_handle(grids{:});
 
+% %% --- Ground Truth (spectral steady-state, optional) ---
+% if flagUtrue
+%     ground_truth = computeDiffusionGroundTruth(f_vals, A, N_vecs, dx, d);
+% else
+%     ground_truth = [];
+% end
+
 %% --- Operator Construction ---
-% fprintf('Building Quantum Operator for d=%d, N=%d...\n', d, N);
-Q_Op  = QPDE_Generator_Diffusion(A, params.n, dt);
+Q_Op = QPDE_Generator_Diffusion(A, params.n, dt);
 
 %% --- Time Evolution Loop ---
-[u_class, u_quant, E_class_history, E_quant_history] = runTimeEvolution(...
-    u_init, f_vals, grids, A, N_vecs, dx, dt, steps, Q_Op, d, N);
-
-%% --- Ground Truth (spectral, optional) ---
-if flagUtrue
-    f_an_vals    = f_analytical(grids{:});
-    ground_truth = computeSpectralGroundTruth(f_an_vals, A, N, d, dx);
-end
+[u_class, u_quant, u_gt, E_class_history, E_quant_history, E_gt_history] = runTimeEvolution(...
+    u_init, f_vals, A, N_vecs, dx, dt, steps, Q_Op, d,flagUtrue);%ground_truth
 
 %% --- Visualize ---
 if flagUtrue
-    visualize_simulation_results(u_class, u_quant, d, N, ground_truth);
+    visualize_simulation_results(u_class, u_quant, d, N, u_gt);
 else
     visualize_simulation_results(u_class, u_quant, d, N);
 end
-visualize_energy(E_class_history, E_quant_history, dt);
+
+if flagUtrue
+    visualize_energy(E_class_history, E_quant_history, E_gt_history, dt);
+else
+    visualize_energy(E_class_history, E_quant_history, dt);
+end
+
 
 %% --- Save Results ---
 if flagUtrue
-    saveResults_Diffusion(u_class, u_quant, E_class_history, E_quant_history, d, true, ground_truth);
+    saveResults_Diffusion(u_class, u_quant, E_class_history, E_quant_history, d, true, u_gt, E_gt_history);
 else
-    saveResults_Diffusion(u_class, u_quant, E_class_history, E_quant_history, d, false, []);
+    saveResults_Diffusion(u_class, u_quant, E_class_history, E_quant_history, d, false, [], []);
 end
-%% --- Report Errors & Energy ---
+
+% --- Report Errors & Energy ---
 if flagUtrue
-    reportMetrics(u_class, u_quant, E_class_history, E_quant_history, true, ground_truth);
+    reportMetrics(u_class, u_quant, E_class_history, E_quant_history, true, u_gt, E_gt_history);
 else
-    reportMetrics(u_class, u_quant, E_class_history, E_quant_history, false, []);
+    reportMetrics(u_class, u_quant, E_class_history, E_quant_history, false, [], []);
 end
 
 end

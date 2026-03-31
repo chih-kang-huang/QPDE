@@ -1,4 +1,4 @@
-function [grids, N_dir, dx] = GenericElliptic_QPDE(f, A, N, d, u_true)
+function [grids, N_dir, dx] = GenericHelmoltz_QPDE(f, k, N, d, u_true)
 
 %% --- Setup ---
 flagUtrue = (nargin >= 5);
@@ -11,14 +11,13 @@ grids     = params.grids;
 f_vals  = f(grids{:});
 f_flat  = f_vals(:);
 
-u_generic = solver_Elliptic_generic(f_flat, grids, A, N_dir, dx);
-
-op = QPDE_Generator(A, params.n);
+u_generic = solver_Helmoltz_generic(f_flat, grids, k, N_dir, dx);
+op = QPDE_Generator_helmoltz(k,d, params.n);
 u_quantum = op * f_flat;
 
 %% --- Ground Truth (spectral, optional) ---
 if flagUtrue
-    ground_truth = computeSpectralGroundTruth(f_vals, A, N, d, dx);
+    ground_truth = computeSpectralGroundTruthHelmoltz(f_vals, k, N, d, dx);
 end
 
 %% --- Visualize ---
@@ -30,18 +29,8 @@ saveResults(u_generic, u_quantum, d, flagUtrue, ground_truth);
 %% --- Report Errors ---
 u_q_real = real(u_quantum);
 if flagUtrue
-% Absolute Errors
-    abs_err_classical = norm(u_generic(:)  - ground_truth(:));
-    abs_err_quantum   = norm(u_q_real(:)   - ground_truth(:));
-
-    % Relative Errors
-    rel_err_classical = abs_err_classical / norm(ground_truth(:));
-    rel_err_quantum   = abs_err_quantum   / norm(ground_truth(:));
-
-    fprintf('\n--- Absolute Errors (vs Ground Truth) ---\n');
-    fprintf('Classical Absolute Error: %.4e\n', abs_err_classical);
-    fprintf('Quantum   Absolute Error: %.4e\n', abs_err_quantum);
-
+    rel_err_classical = norm(u_generic(:)  - ground_truth(:)) / norm(ground_truth(:));
+    rel_err_quantum   = norm(u_q_real(:)   - ground_truth(:)) / norm(ground_truth(:));
     fprintf('\n--- Relative Errors (vs Ground Truth) ---\n');
     fprintf('Classical Relative Error: %.4e\n', rel_err_classical);
     fprintf('Quantum   Relative Error: %.4e\n', rel_err_quantum);

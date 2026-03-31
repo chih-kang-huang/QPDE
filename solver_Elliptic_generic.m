@@ -27,23 +27,43 @@ D    = diag(k);
 Imat = eye(Nx);
 
 %% 5. Build elliptic operator
+% N_total       = Nx^dim;
+% Elliptic_spec = zeros(N_total);
+% for i = 1:dim
+%     for j = 1:dim
+%         if A(i,j) ~= 0
+%             mats = repmat({Imat}, 1, dim);
+%             mats{i} = mats{i} * D;
+%             mats{j} = mats{j} * D;
+%             term = mats{1};
+%             for kk = 2:dim
+%                 term = kron(term, mats{kk});
+%             end
+%             Elliptic_spec = Elliptic_spec + A(i,j) * term;
+%         end
+%     end
+% end
+
 N_total       = Nx^dim;
 Elliptic_spec = zeros(N_total);
+
 for i = 1:dim
     for j = 1:dim
         if A(i,j) ~= 0
-            mats = repmat({Imat}, 1, dim);
-            mats{i} = mats{i} * D;
-            mats{j} = mats{j} * D;
-            term = mats{1};
-            for kk = 2:dim
-                term = kron(term, mats{kk});
+            term = 1;
+            for k = 1:dim
+                if k == i && k == j
+                    term = kron(term, D^2);
+                elseif k == i || k == j
+                    term = kron(term, D);
+                else
+                    term = kron(term, Imat);
+                end
             end
             Elliptic_spec = Elliptic_spec + A(i,j) * term;
         end
     end
 end
-
 %% 6. Invert and solve
 inverse_Elliptic = inv(Elliptic_spec);
 u_flatten        = GF * inverse_Elliptic * f_h;

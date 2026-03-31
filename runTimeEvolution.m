@@ -15,7 +15,8 @@ function [u_class, u_quant, u_gt, E_class, E_quant, E_gt] = ...
     else
         u_gt = [];
     end
-
+    ground_truth = computeSpectralGroundTruth(f_vals, A, N, d, dx);
+    E_ref=new_energy(ground_truth,f_vals,A,N,dx,d);
     for t = 1:steps
         % --- Classical Step ---
         rhs     = u_class - dt * f_vals;
@@ -30,11 +31,16 @@ function [u_class, u_quant, u_gt, E_class, E_quant, E_gt] = ...
         if flagGT
             rhs_gt = u_gt - dt * f_vals;
             u_gt   = computeDiffusionGroundTruth(rhs_gt, A, N_vecs, dx,dt, d);
-            E_gt(t) = energy(u_gt, A, N, dx, d);
+            E_gt(t) = new_energy(u_gt, f_vals,A, N, dx, d)-E_ref+1e-6;
+            % E_gt(t) = energy(u_gt,A, N, dx, d);
         end
 
         % --- Energy ---
-        E_class(t) = energy(u_class, A, N, dx, d);
-        E_quant(t) = energy(u_quant, A, N, dx, d);
+        % E_class(t) = energy(u_class, A, N, dx, d);
+        % E_quant(t) = energy(u_quant, A, N, dx, d);
+        E_class(t) = new_energy(u_class,f_vals, A, N, dx, d)-E_ref+1e-6;
+        E_quant(t) = new_energy(u_quant,f_vals, A, N, dx, d)-E_ref+1e-6;
+
     end
+
 end

@@ -1,4 +1,4 @@
-function totalMat = QPDE_Generator(A, n)
+function totalMat = QPDE_Generator_helmoltz(k,d, n)
 % Builds the quantum circuit matrix for the elliptic PDE solver.
 %
 %   Inputs:
@@ -7,8 +7,7 @@ function totalMat = QPDE_Generator(A, n)
 %
 %   Output:
 %     totalMat - 2^(d*n) x 2^(d*n) unitary operator matrix
-addpath("/home/g.antonioli/qclab")
-d = size(A, 1);
+% addpath("/home/g.antonioli/qclab")
 N = 2^n;
 
 
@@ -16,11 +15,12 @@ N_vecs = repmat(N, 1, d);
 dx     = 1.0 / N;         
 
 
-denom = buildEllipticDenom(A, N_vecs, dx, d);
+denom = buildHelmoltzDenom(k, N_vecs, dx, d);
 
 invOP = diag(1 ./ denom(:));
-alpha=norm(invOP,'inf');
-DiagEncoding = MakeUnitary(invOP/alpha);
+alpha=norm(invOP,'inf')
+invOP=invOP/alpha;
+DiagEncoding = MakeUnitary(invOP);
 
 FG = GroupFourier(d, n);
 GF = FG.ctranspose();
