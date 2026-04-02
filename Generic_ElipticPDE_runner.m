@@ -2,14 +2,14 @@
 clear; clc; close all;
 
 
-dim = 2;            
-n  = 3;
+dim = 3;            
+n  = 5;
 N=2^n;
 
 
 if dim == 2
-    A = eye(2);
-    A=[3,1;1,2];
+    %A = eye(2);
+    A=[100000,0;0,1];
 elseif dim == 3
     A = eye(3); 
 end
