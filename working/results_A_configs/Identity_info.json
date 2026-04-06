@@ -10,7 +10,7 @@
       1.0
     ]
   ],
-  "condition_number": 1.3158273408348595,
-  "error_classical": 1.655399538474461e-14,
-  "error_quantum": 6.235982576498307e-14
+  "condition_number": 81.85179925372402,
+  "error_classical": 4.6390752278606545e-14,
+  "error_quantum": 5.290768716654885e-14
 }

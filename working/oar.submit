@@ -1,0 +1,15 @@
+#!/bin/bash 
+
+### esterel33-35 = A40
+### esterel36-38 = A100
+### esterel42 = H100
+### esterel43-44 = L40S
+### musa = H100 p2
+
+### gpu = gres
+if [ ! -z $3 ]
+then
+		oarsub -q abaca  -l walltime=24 --notify "[END,ERROR]mail:chih-kang.huang@inria.fr" -n $2 -O out.$2 -E err.$2 "module load conda; conda activate ml ; papermill $1 '$2-$(date +%y%m%d-%H).ipynb' --log-output --progress-bar -f $3"
+else
+		oarsub -q abaca  -l walltime=24 --notify "[END,ERROR]mail:chih-kang.huang@inria.fr" -n $2 -O out.$2 -E err.$2 "module load conda; conda activate ml ; papermill $1 '$2-$(date +%y%m%d-%H).ipynb' --log-output --progress-bar"
+fi
