@@ -1,0 +1,1 @@
+This repository contains the python and MATLAB codes to simulate classical spectral method and its quantum implementation in the paper [A QUANTUM SPECTRAL FRAMEWORK FOR SOLVING PDES](https://arxiv.org/abs/2604.25825) by Huang, Antonioli and Barbaresco.
